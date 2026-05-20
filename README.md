@@ -1,4 +1,4 @@
-# BMAD Code Guardian
+# Code Quality Gate ( Commit Agent )
 
 Server-side, un-bypassable AI gatekeeper for pull requests. Runs on GitHub
 self-hosted runners, inspects every code delta with GitHub Copilot's
