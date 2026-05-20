@@ -1,12 +1,12 @@
 {
   "$schema": "https://bmad.dev/schemas/marketplace.v1.json",
-  "name": "code-quality-gate-gitcommit",
+  "name": "commit-agent",
   "version": "1.0.0",
   "displayName": "Code Quality Gate (Git Commit)",
   "description": "Server-side AI gatekeeper for PRs. Scans every diff for security flaws, repository drift, and best-practice violations across AEM, modern frontend, and Magento/PHP. Blocks the merge button via GitHub Repository Rulesets.",
   "publisher": "bhaveshsingh07",
   "license": "Internal",
-  "homepage": "https://github.com/your-org/code-quality-gate-gitcommit",
+  "homepage": "https://github.com/bhaveshsingh07/commit-agent",
   "categories": [
     "ci-cd",
     "security",
