@@ -1,0 +1,110 @@
+# =====================================================================
+# BMAD Code Guardian — reusable workflow
+#
+# Lives in bhaveshsingh07/commit-agent/.github/workflows/code-guardian.yml
+# =====================================================================
+name: Code Guardian (reusable)
+
+on:
+  workflow_call:
+    secrets:
+      COPILOT_PAT:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: false
+      EMAIL_SMTP_HOST:
+        required: false
+      EMAIL_SMTP_USER:
+        required: false
+      EMAIL_SMTP_PASS:
+        required: false
+      EMAIL_RECIPIENTS:
+        required: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  scan:
+    name: scan
+    # macOS + linux self-hosted runners both work
+    runs-on: [self-hosted, code-guardian]
+    timeout-minutes: 15
+
+    steps:
+      # ---- 0. Pre-run workspace purification (self-hosted runners persist)
+      - name: Purify workspace
+        run: |
+          echo "[guardian] Cleaning workspace from any previous run"
+          rm -rf "${{ github.workspace }}/.guardian-tmp" || true
+          mkdir -p "${{ github.workspace }}/.guardian-tmp"
+
+      # ---- 1. Check out the PR head (full history needed for git diff)
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # ---- 2. Pull the central BMAD module so we have the orchestrator + prompts
+      - name: Checkout Code Guardian
+        uses: actions/checkout@v4
+        with:
+          repository: bhaveshsingh07/commit-agent
+          ref: main
+          path: .guardian
+          # If the central repo is private, set BMAD_READ_TOKEN as an org secret:
+          # token: ${{ secrets.BMAD_READ_TOKEN }}
+
+      # ---- 3. Set up Node 20
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ---- 4. Install + build orchestrator
+      - name: Install & build orchestrator
+        working-directory: .guardian
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      # ---- 5. Compute the diff between PR base and head
+      - name: Compute diff
+        id: diff
+        run: |
+          set -euo pipefail
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          DIFF_OUT="${{ github.workspace }}/.guardian-tmp/push_modifications.diff"
+          echo "[guardian] Base: $BASE_SHA  Head: $HEAD_SHA"
+          git diff --unified=3 "$BASE_SHA".."$HEAD_SHA" > "$DIFF_OUT"
+          echo "Diff size: $(wc -l < "$DIFF_OUT") lines"
+          echo "diff_path=$DIFF_OUT" >> "$GITHUB_OUTPUT"
+
+      # ---- 6. Run the orchestrator
+      - name: Run Code Guardian
+        env:
+          DIFF_PATH: ${{ steps.diff.outputs.diff_path }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COPILOT_PAT: ${{ secrets.COPILOT_PAT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          EMAIL_SMTP_HOST: ${{ secrets.EMAIL_SMTP_HOST }}
+          EMAIL_SMTP_USER: ${{ secrets.EMAIL_SMTP_USER }}
+          EMAIL_SMTP_PASS: ${{ secrets.EMAIL_SMTP_PASS }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+        working-directory: .guardian
+        run: node dist/index.js
+
+      # ---- 7. Post-run cleanup (also runs on failure)
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf "${{ github.workspace }}/.guardian-tmp" || true

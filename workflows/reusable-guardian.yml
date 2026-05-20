@@ -1,0 +1,20 @@
+# =====================================================================
+# BMAD Code Guardian — light client caller
+#
+# Drop this file into ANY repository at:
+#     .github/workflows/code-guardian.yml
+#
+# It inherits all org secrets and delegates the actual scanning to the
+# central reusable workflow. No code duplication; updates propagate
+# automatically on the next PR.
+# =====================================================================
+name: Code Guardian
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  scan:
+    uses: bhaveshsingh07/commit-agent/.github/workflows/code-guardian.yml@main
+    secrets: inherit

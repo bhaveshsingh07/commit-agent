@@ -1,0 +1,49 @@
+diff --git a/src/components/UserCard.tsx b/src/components/UserCard.tsx
+index abc1234..def5678 100644
+--- a/src/components/UserCard.tsx
++++ b/src/components/UserCard.tsx
+@@ -10,6 +10,15 @@ import React, { useEffect, useState } from 'react';
+ 
+ export function UserCard({ userId }) {
+   const [user, setUser] = useState(null);
++
++  // Frontend violation: empty deps array but userId is used
++  useEffect(() => {
++    fetch('/api/users/' + userId).then(r => r.json()).then(setUser);
++  }, []);
++
++  // Frontend violation: raw innerHTML with dynamic content
++  const html = `<div>${user?.bio}</div>`;
++  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+ }
+diff --git a/app/code/Acme/Catalog/Model/ProductLoader.php b/app/code/Acme/Catalog/Model/ProductLoader.php
+index 1111111..2222222 100644
+--- a/app/code/Acme/Catalog/Model/ProductLoader.php
++++ b/app/code/Acme/Catalog/Model/ProductLoader.php
+@@ -5,8 +5,14 @@ namespace Acme\Catalog\Model;
+ class ProductLoader
+ {
++    // Magento violation: direct ObjectManager use
++    public function load($id)
++    {
++        $om = \Magento\Framework\App\ObjectManager::getInstance();
++        $repo = $om->get(\Magento\Catalog\Api\ProductRepositoryInterface::class);
++        return $repo->getById($id);
++    }
+ }
+diff --git a/core/src/main/java/com/acme/components/HeaderModel.java b/core/src/main/java/com/acme/components/HeaderModel.java
+index 3333333..4444444 100644
+--- a/core/src/main/java/com/acme/components/HeaderModel.java
++++ b/core/src/main/java/com/acme/components/HeaderModel.java
+@@ -20,6 +20,13 @@ public class HeaderModel {
+ 
+     public String getTitle() {
++        // AEM violation: ResourceResolver opened, never closed
++        ResourceResolver rr = resolverFactory.getServiceResourceResolver(
++            java.util.Collections.singletonMap(
++                ResourceResolverFactory.SUBSERVICE, "acme-content"));
++        Resource res = rr.getResource("/content/acme/en/header");
++        return res.getValueMap().get("jcr:title", String.class);
++        // rr never closed -> JCR session leak
+     }
+ }

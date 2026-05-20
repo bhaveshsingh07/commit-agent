@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bhaveshsingh07.internal/schemas/code-guardian/output-contract.json",
+  "title": "CodeGuardianVerdict",
+  "description": "Strict zero-shot JSON contract that every Copilot response must satisfy.",
+  "type": "object",
+  "required": ["isCompliant", "issue", "remediation"],
+  "additionalProperties": false,
+  "properties": {
+    "isCompliant": {
+      "type": "boolean",
+      "description": "True when the chunk passes all applicable rules; false on any violation."
+    },
+    "issue": {
+      "type": "string",
+      "description": "One-line description of the violation. Empty string when isCompliant is true.",
+      "maxLength": 500
+    },
+    "remediation": {
+      "type": "string",
+      "description": "Concrete fix including a corrected code snippet. Empty string when isCompliant is true.",
+      "maxLength": 4000
+    }
+  }
+}

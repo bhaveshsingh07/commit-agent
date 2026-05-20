@@ -1,0 +1,30 @@
+{
+  "name": "@bhaveshsingh07/commit-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Server-side AI gatekeeper for pull requests. Routes diff chunks across AEM, modern frontend, and Magento/PHP buckets and gates the merge button via GitHub Repository Rulesets.",
+  "main": "dist/index.js",
+  "bin": {
+    "code-guardian": "dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "start": "node dist/index.js",
+    "lint:prompts": "node -e \"require('fs').readdirSync('skills/code-guardian/prompts').forEach(f=>require('fs').readFileSync('skills/code-guardian/prompts/'+f,'utf-8'))\"",
+    "lint:schema": "node -e \"JSON.parse(require('fs').readFileSync('skills/code-guardian/schemas/output-contract.json','utf-8'))\"",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {},
+  "optionalDependencies": {
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "typescript": "^5.4.5"
+  },
+  "license": "UNLICENSED"
+}
