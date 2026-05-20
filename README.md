@@ -34,7 +34,7 @@ extensions:
 ## Repository layout
 
 ```
-code-quality-gate-gitcommit/
+commit-agent/
 ├── .claude-plugin/
 │   └── marketplace.json          # Plugin manifest for the BMAD ecosystem
 ├── skills/
@@ -81,8 +81,8 @@ code-quality-gate-gitcommit/
 
 ```bash
 # 1. Unzip the package and enter it
-unzip code-quality-gate-gitcommit.zip
-cd code-quality-gate-gitcommit
+unzip commit-agent.zip
+cd commit-agent
 
 # 2. Run the macOS setup (installs Node, TS, deps, lints the project)
 chmod +x scripts/*.sh

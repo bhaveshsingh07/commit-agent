@@ -26,20 +26,20 @@ both Apple Silicon (M1/M2/M3/M4) and Intel.
 ## 1. Clone the central governance repo
 
 The package you have in front of you is meant to live in **one** central
-repository in your org, e.g. `your-org/code-quality-gate-gitcommit`. Every other repo
+repository in your org, e.g. `your-org/commit-agent`. Every other repo
 calls it via `workflow_call`.
 
 ```bash
 # Create the central repo (one time, on github.com)
-gh repo create your-org/code-quality-gate-gitcommit --private --confirm
+gh repo create your-org/commit-agent --private --confirm
 
 # Push this package into it
-cd code-quality-gate-gitcommit
+cd commit-agent
 git init
 git add .
 git commit -m "feat: initial BMAD Code Guardian skeleton"
 git branch -M main
-git remote add origin git@github.com:your-org/code-quality-gate-gitcommit.git
+git remote add origin git@github.com:your-org/commit-agent.git
 git push -u origin main
 ```
 
@@ -143,7 +143,7 @@ on:
 
 jobs:
   scan:
-    uses: your-org/code-quality-gate-gitcommit/.github/workflows/code-guardian.yml@main
+    uses: your-org/commit-agent/.github/workflows/code-guardian.yml@main
     secrets: inherit
 ```
 
