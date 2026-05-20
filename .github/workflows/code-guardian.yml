@@ -30,17 +30,17 @@ permissions:
 jobs:
   scan:
     name: scan
-    # macOS + linux self-hosted runners both work
-    runs-on: [self-hosted, code-guardian]
+    # macOS + linux self-hosted runners both work ([self-hosted, linux, code-guardian])
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
       # ---- 0. Pre-run workspace purification (self-hosted runners persist)
-      - name: Purify workspace
-        run: |
-          echo "[guardian] Cleaning workspace from any previous run"
-          rm -rf "${{ github.workspace }}/.guardian-tmp" || true
-          mkdir -p "${{ github.workspace }}/.guardian-tmp"
+     # - name: Purify workspace
+      #  run: |
+      #    echo "[guardian] Cleaning workspace from any previous run"
+       #   rm -rf "${{ github.workspace }}/.guardian-tmp" || true
+        #  mkdir -p "${{ github.workspace }}/.guardian-tmp"
 
       # ---- 1. Check out the PR head (full history needed for git diff)
       - name: Checkout PR
