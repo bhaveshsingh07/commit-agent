@@ -82,7 +82,7 @@ jobs:
           set -euo pipefail
           BASE_SHA="${{ github.event.pull_request.base.sha }}"
           HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          DIFF_OUT="${{ github.workspace }}/.guardian-tmp/push_modifications.diff"
+          DIFF_OUT="/tmp/push_modifications.diff"
           echo "[guardian] Base: $BASE_SHA  Head: $HEAD_SHA"
           git diff --unified=3 "$BASE_SHA".."$HEAD_SHA" > "$DIFF_OUT"
           echo "Diff size: $(wc -l < "$DIFF_OUT") lines"
