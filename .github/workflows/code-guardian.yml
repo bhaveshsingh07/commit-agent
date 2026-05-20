@@ -56,8 +56,9 @@ jobs:
           repository: bhaveshsingh07/commit-agent
           ref: main
           path: .guardian
-          # If the central repo is private, set BMAD_READ_TOKEN as an org secret:
-          # token: ${{ secrets.BMAD_READ_TOKEN }}
+          token: ${{ secrets.GH_TOKEN || github.token }}  # Add this line
+          # If the central repo is private, set READ_TOKEN as an org secret:
+          # token: ${{ secrets.READ_TOKEN }}
 
       # ---- 3. Set up Node 20
       - name: Setup Node 20
