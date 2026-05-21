@@ -134,7 +134,7 @@ All working CI/CD code remains **100% intact**:
 ### With BMad Installed
 ```bash
 # Install the module
-npx bmad-method install --module https://github.com/bhaveshsingh07/commit-agent
+npx bmad-method install --module https://github.com/dept/dtin-commit-agent
 
 # Verify it appears in help
 bmad-help | grep code-guardian
@@ -148,7 +148,7 @@ bmad-help | grep code-guardian
 All original functionality still works:
 ```bash
 # Traditional deployment
-git clone https://github.com/bhaveshsingh07/commit-agent
+git clone https://github.com/dept/dtin-commit-agent
 cd commit-agent
 npm install && npm run build
 # Push to GitHub, add secrets, etc. (see SETUP.md)

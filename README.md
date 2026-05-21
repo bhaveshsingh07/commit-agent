@@ -12,7 +12,7 @@ Server-side AI gatekeeper that automatically scans pull requests for security vu
 
 ```bash
 # Install the module
-npx bmad-method install --module https://github.com/bhaveshsingh07/commit-agent
+npx bmad-method install --module https://github.com/dept/dtin-commit-agent
 
 # Get setup guidance
 bmad-help setup-code-guardian

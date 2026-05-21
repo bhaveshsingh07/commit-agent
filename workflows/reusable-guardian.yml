@@ -16,5 +16,5 @@ on:
 
 jobs:
   scan:
-    uses: bhaveshsingh07/commit-agent/.github/workflows/code-guardian.yml@main
+    uses: dept/dtin-commit-agent/.github/workflows/code-guardian.yml@main
     secrets: inherit

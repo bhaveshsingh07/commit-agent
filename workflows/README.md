@@ -11,7 +11,7 @@ up, under `.github/workflows/`.
 
 ## What goes where
 
-**Central repo (this one, `bhaveshsingh07/commit-agent`):**
+**Central repo (this one, `dept/dtin-commit-agent`):**
 ```
 .github/workflows/
   └── code-guardian.yml         ← the reusable workflow (workflow_call)

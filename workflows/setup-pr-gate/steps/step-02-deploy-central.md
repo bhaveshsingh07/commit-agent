@@ -58,7 +58,7 @@ If you changed the repo name from `commit-agent` to something else, update:
 **Quick find & replace:**
 ```bash
 # Replace YOUR_ORG and YOUR_REPO_NAME
-grep -rl "bhaveshsingh07/commit-agent" . | xargs sed -i '' 's|bhaveshsingh07/commit-agent|YOUR_ORG/YOUR_REPO_NAME|g'
+grep -rl "dept/dtin-commit-agent" . | xargs sed -i '' 's|dept/dtin-commit-agent|YOUR_ORG/YOUR_REPO_NAME|g'
 ```
 
 ## Next Step

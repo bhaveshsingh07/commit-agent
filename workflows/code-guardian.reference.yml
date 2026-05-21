@@ -1,7 +1,7 @@
 # =====================================================================
 # BMAD Code Guardian — reusable workflow
 #
-# Lives in bhaveshsingh07/commit-agent/.github/workflows/code-guardian.yml
+# Lives in dept/dtin-commit-agent/.github/workflows/code-guardian.yml
 # =====================================================================
 name: Code Guardian (reusable)
 
@@ -52,7 +52,7 @@ jobs:
       - name: Checkout Code Guardian
         uses: actions/checkout@v4
         with:
-          repository: bhaveshsingh07/commit-agent
+          repository: dept/dtin-commit-agent
           ref: main
           path: .guardian
           # If the central repo is private, set BMAD_READ_TOKEN as an org secret:

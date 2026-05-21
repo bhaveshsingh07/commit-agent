@@ -16,8 +16,8 @@ author:
   email: bhavesh.singh@example.com
   github: bhaveshsingh07
 
-homepage: https://github.com/bhaveshsingh07/commit-agent
-repository: https://github.com/bhaveshsingh07/commit-agent
+homepage: https://github.com/dept/dtin-commit-agent
+repository: https://github.com/dept/dtin-commit-agent
 
 license: UNLICENSED
 
@@ -56,7 +56,7 @@ installation:
     This module requires both BMad-level and GitHub-level setup:
     
     1. Add to your project: npx bmad-method install --module code-quality-gate
-    2. Deploy central repo: Push this code to bhaveshsingh07/commit-agent
+    2. Deploy central repo: Push this code to dept/dtin-commit-agent
     3. Add secrets: COPILOT_PAT at org or repo level
     4. Install runner: For self-hosted, see SETUP.md
     5. Add to repos: Copy .github/workflows/code-guardian.yml to consumer repos
