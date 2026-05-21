@@ -1,0 +1,3 @@
+menu_code,type,name,file_path,description,category
+CG,skill,code-guardian,skills/code-guardian/SKILL.md,"Automated PR gatekeeper that scans code changes for security flaws and best-practice violations",ci-cd
+SETUP-CG,workflow,setup-code-guardian,workflows/setup-pr-gate/workflow.md,"Install and configure Code Guardian in your repository",setup

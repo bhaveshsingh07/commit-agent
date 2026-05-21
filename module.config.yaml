@@ -1,0 +1,78 @@
+name: code-quality-gate
+version: 1.0.0
+description: |
+  Server-side AI gatekeeper for pull requests. Automatically scans every PR 
+  for security vulnerabilities, repository impact, and platform-specific best 
+  practices across AEM, modern frontend (React/TS), and Magento/PHP codebases.
+  
+  Blocks the merge button when violations are found, posts detailed remediation 
+  guidance, and sends notifications via Slack and email.
+
+author:
+  name: Bhavesh Singh
+  email: bhavesh.singh@example.com
+  github: bhaveshsingh07
+
+homepage: https://github.com/bhaveshsingh07/commit-agent
+repository: https://github.com/bhaveshsingh07/commit-agent
+
+license: UNLICENSED
+
+tags:
+  - ci-cd
+  - security
+  - code-quality
+  - pr-gatekeeper
+  - github-actions
+
+runtime_requirements:
+  node: ">=20"
+  runner: self-hosted or github-hosted
+  required_secrets:
+    - COPILOT_PAT
+  optional_secrets:
+    - SLACK_WEBHOOK_URL
+    - EMAIL_SMTP_HOST
+    - EMAIL_SMTP_USER
+    - EMAIL_SMTP_PASS
+    - EMAIL_RECIPIENTS
+
+supported_platforms:
+  - aem
+  - react
+  - typescript
+  - magento
+  - php
+
+installation:
+  type: custom
+  instructions: |
+    This module requires both BMad-level and GitHub-level setup:
+    
+    1. Add to your project: npx bmad-method install --module code-quality-gate
+    2. Deploy central repo: Push this code to bhaveshsingh07/commit-agent
+    3. Add secrets: COPILOT_PAT at org or repo level
+    4. Install runner: For self-hosted, see SETUP.md
+    5. Add to repos: Copy .github/workflows/code-guardian.yml to consumer repos
+
+config_options:
+  ai_provider:
+    type: string
+    default: copilot
+    allowed: [copilot, claude]
+    description: Which AI service to use for code analysis
+  
+  slack_enabled:
+    type: boolean
+    default: false
+    description: Send failure notifications to Slack
+  
+  email_enabled:
+    type: boolean
+    default: false
+    description: Send failure notifications via email
+  
+  concurrency:
+    type: integer
+    default: 4
+    description: Number of chunks to analyze in parallel

@@ -1,22 +1,89 @@
 ---
 name: code-guardian
-description: Server-side gatekeeper skill that scans every git diff chunk in a pull request across security, repository impact, and best-practices. Use whenever a GitHub PR is opened, synchronized, or reopened against a repository in the org. Routes file paths and extensions into AEM/Java/JSP/XML, Modern Frontend (JS/TS/React/HTML/CSS), or Magento/PHP buckets, dispatches each chunk to GitHub Copilot's programmatic completions API with a zero-shot strict-JSON contract, and emits a single boolean compliance verdict that the runner uses to fail the workflow and freeze the merge button.
+type: automation
+category: ci-cd
 version: 1.0.0
-runtime: node>=20
+menu_code: CG
+
+description: |
+  Server-side gatekeeper that automatically scans every PR for security 
+  vulnerabilities, repository impact, and platform-specific best practices. 
+  Blocks merge button when violations are found.
+
+summary: |
+  Scans git diffs across three validation pillars (security, repo impact, 
+  best practices) using AI-powered analysis. Routes code chunks by language/
+  platform (AEM, React/TS, Magento/PHP) to specialized prompts. Fails the 
+  GitHub Actions workflow and freezes merge on any violation.
+
+trigger: |
+  Automatically invoked by GitHub Actions on pull_request events 
+  (opened, synchronize, reopened) in repositories where the consumer 
+  workflow is installed.
+
+runtime:
+  type: node
+  version: ">=20"
+  environment: github-actions
+  execution: server-side
+
 inputs:
   - name: diff_path
     type: file
     required: true
-    description: Path to the unified git diff produced by the runner (typically /tmp/push_modifications.diff)
+    description: Path to unified git diff (e.g., /tmp/push_modifications.diff)
+  
   - name: pr_context
     type: object
     required: true
-    description: PR metadata { number, repo, sha, author }
+    properties:
+      number: PR number
+      repo: Repository in owner/name format
+      sha: Head commit SHA
+      author: PR author login
+    description: PR metadata passed from GitHub Actions context
+
 outputs:
   - name: verdict
     type: object
     schema: schemas/output-contract.json
-    description: Aggregated compliance result across all chunks
+    properties:
+      isCompliant: boolean
+      results: array of ChunkResult objects
+      totalChunks: integer
+      violations: integer
+    description: Aggregated compliance verdict across all diff chunks
+  
+  - name: exit_code
+    type: integer
+    values: [0, 1]
+    description: 0 = pass (merge allowed), 1 = fail (merge blocked)
+
+side_effects:
+  - Posts comment on GitHub PR with violation details
+  - Sends Slack notification (if configured)
+  - Sends email alert (if configured)
+  - Exits with code 1 to fail the GitHub Actions workflow
+
+dependencies:
+  external:
+    - GitHub Actions (runner infrastructure)
+    - GitHub Copilot API or Anthropic Claude API
+  internal:
+    - prompts/security.md (always evaluated)
+    - prompts/aem.md (AEM/Java/JSP/XML files)
+    - prompts/frontend.md (JS/TS/React/HTML/CSS files)
+    - prompts/magento.md (PHP/Magento files)
+    - schemas/output-contract.json (response validation)
+
+related_workflows:
+  - setup-pr-gate (Installation workflow)
+
+tags:
+  - security-scanning
+  - code-review
+  - pr-automation
+  - merge-blocking
 ---
 
 # Code Guardian — Agent-as-Code Specification

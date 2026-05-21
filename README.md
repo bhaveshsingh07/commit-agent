@@ -1,132 +1,122 @@
-# Code Quality Gate ( Commit Agent )
+# Code Quality Gate — BMad Module
 
-Server-side, un-bypassable AI gatekeeper for pull requests. Runs on GitHub
-self-hosted runners, inspects every code delta with GitHub Copilot's
-programmatic completions API, and blocks the **Merge Pull Request** button
-when the AI finds non-compliant patterns.
+> **BMad-compliant CI/CD module** for automated PR quality enforcement via GitHub Actions
 
-> Built on the **BMAD (Breakthrough Method for Agile AI-Driven Development)**
-> framework, so a single central module governs every microservice in the org.
+Server-side AI gatekeeper that automatically scans pull requests for security vulnerabilities, repository impact, and platform-specific best practices. Blocks the merge button when violations are found.
 
 ---
 
-## What it enforces
+## Quick Start
 
-Every `git diff` chunk is scrutinised across three pillars:
-
-1. **Security** — XSS, SQL injection, hardcoded secrets, unprotected resource
-   handling, path traversal, deserialisation flaws.
-2. **Repository impact** — bloat, drift from project conventions, duplication,
-   broken layering.
-3. **Best practices** — language and platform-specific cleanliness rules.
-
-Three language buckets are routed automatically based on file paths and
-extensions:
-
-| Bucket | Triggers | Focus |
-| --- | --- | --- |
-| **AEM Core & EDS** | `/apps/`, `/libs/`, `/blocks/`, `/scripts/`, `.java`, `.jsp`, `.xml` | Unclosed `ResourceResolver`, HTL context security, native DOM in EDS blocks |
-| **Modern Frontend** | `.js`, `.jsx`, `.ts`, `.tsx`, `.html`, `.css`, `.scss` | `dangerouslySetInnerHTML`, missing React keys, `useEffect` deps |
-| **Magento & PHP** | `/app/code/`, `/vendor/magento/`, `.php`, `.phtml` | Direct `ObjectManager` calls, raw SQL, N+1 collection loops |
-
----
-
-## Repository layout
-
-```
-commit-agent/
-├── .claude-plugin/
-│   └── marketplace.json          # Plugin manifest for the BMAD ecosystem
-├── skills/
-│   └── code-guardian/
-│       ├── SKILL.md              # Agent-as-Code declarative spec
-│       ├── prompts/              # Per-language system prompts
-│       └── schemas/              # JSON output contract
-├── src/                          # TypeScript orchestrator
-│   ├── index.ts
-│   ├── orchestrator.ts
-│   ├── diff-parser.ts
-│   ├── language-router.ts
-│   ├── copilot-client.ts
-│   ├── reporter.ts
-│   ├── types.ts
-│   └── notifiers/
-│       ├── github.ts
-│       ├── slack.ts
-│       └── email.ts
-├── workflows/
-│   ├── code-guardian.yml         # Reusable workflow (lives in central repo)
-│   └── reusable-guardian.yml     # 15-line caller dropped into every repo
-├── scripts/
-│   ├── setup-mac.sh              # One-shot macOS dev setup
-│   ├── install-runner-mac.sh     # Install GitHub self-hosted runner on macOS
-│   ├── cleanup-workspace.sh      # Pre-run purification (rm -rf workspace)
-│   └── run-local.sh              # Run the orchestrator against a local diff
-├── config/
-│   ├── ruleset.example.json      # GitHub Repository Ruleset
-│   └── env.example               # Required env vars
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── TROUBLESHOOTING.md
-├── package.json
-├── tsconfig.json
-├── .gitignore
-├── SETUP.md
-└── README.md
-```
-
----
-
-## Quick start (macOS)
+### For BMad Users
 
 ```bash
-# 1. Unzip the package and enter it
-unzip commit-agent.zip
-cd commit-agent
+# Install the module
+npx bmad-method install --module https://github.com/bhaveshsingh07/commit-agent
 
-# 2. Run the macOS setup (installs Node, TS, deps, lints the project)
-chmod +x scripts/*.sh
-./scripts/setup-mac.sh
+# Get setup guidance
+bmad-help setup-code-guardian
 
-# 3. (Optional) Try the orchestrator against a local diff
-git diff main...HEAD > /tmp/push_modifications.diff
-./scripts/run-local.sh /tmp/push_modifications.diff
+# Or invoke the workflow directly
+workflows/setup-pr-gate/workflow.md
 ```
 
-See **[SETUP.md](SETUP.md)** for the full server-side install path (self-hosted
-runner, GitHub Repository Ruleset, Copilot PAT, Slack/email notifiers).
+### Without BMad
+
+See `SETUP.md` for traditional deployment.
 
 ---
 
-## How a PR flows through the system
+## What This Module Provides
+
+### BMad Integration
+
+| Component | Type | Access Code |
+| --- | --- | --- |
+| Code Guardian Skill | Automation | `CG` |
+| Setup Workflow | Guided Process | `SETUP-CG` |
+
+### Supported Platforms & Violations Caught
+
+| Platform | File Triggers | What It Detects |
+| --- | --- | --- |
+| **AEM Core & EDS** | `/apps/`, `/libs/`, `/blocks/`, `.java`, `.jsp`, `.xml` | Unclosed `ResourceResolver`, HTL context security, native DOM in EDS blocks |
+| **Modern Frontend** | `.js`, `.jsx`, `.ts`, `.tsx`, `.html`, `.css`, `.scss` | `dangerouslySetInnerHTML`, missing React keys, broken `useEffect` deps |
+| **Magento & PHP** | `/app/code/`, `/vendor/magento/`, `.php`, `.phtml` | Direct `ObjectManager` calls, raw SQL, N+1 collection loops |
+
+**Security Overlay (always evaluated):** XSS, SQL injection, hardcoded secrets, path traversal, weak crypto
+
+---
+
+## Architecture
+
+**Hybrid BMad + GitHub Actions Design:**
+
+- **BMad Layer:** Skills, workflows, documentation, configuration
+- **Runtime Layer:** TypeScript orchestrator executing on GitHub Actions runners
+- **AI Layer:** GitHub Copilot or Anthropic Claude for code analysis
 
 ```
-[GitHub PR opened/synchronize/reopened]
-        │
-        ▼ (long-poll meta signal)
-[Self-hosted runner on corp network]
-        │
-        ▼ (cleanup-workspace.sh)
-[Volatile workspace] ──(git diff)──> /tmp/push_modifications.diff
-        │
-        ▼ (Node.js orchestrator reads the diff)
-[Diff parser] ──> CodeBlock[]
-        │
-        ▼ (language router by path + extension)
-[AEM | Frontend | Magento prompt selectors]
-        │
-        ▼ (Copilot completions API, programmatic)
-[Strict JSON: { isCompliant, issue, remediation }]
-        │
-        ▼
-[Reporter] ──> PR comment + Slack webhook + Email
-        │
-        ▼ (any false verdict)
-process.exit(1) ──> required status check red ──> merge button frozen
+Developer opens PR
+    ↓
+GitHub Actions triggers (via .github/workflows/code-guardian.yml)
+    ↓
+Runner executes TypeScript orchestrator (src/)
+    ↓
+Orchestrator loads prompts from skills/code-guardian/prompts/
+    ↓
+AI analyzes each code chunk
+    ↓
+Aggregated verdict → exit code 0 (pass) or 1 (fail)
+    ↓
+GitHub blocks merge if failed
 ```
+
+---
+
+## Supported Platforms
+
+- **AEM Core & Edge Delivery Services** — Java, JSP, HTL, XML
+- **Modern Frontend** — React, TypeScript, JavaScript, HTML, CSS
+- **Magento Commerce** — PHP, Magento 2 framework
+
+---
+
+## Module Structure
+
+```
+code-quality-gate/
+├── module-help.csv              ← BMad catalog
+├── module.config.yaml           ← BMad configuration
+├── skills/
+│   └── code-guardian/
+│       ├── SKILL.md             ← Skill definition (BMad)
+│       ├── prompts/             ← AI prompts (runtime)
+│       └── schemas/             ← Output validation
+├── workflows/
+│   └── setup-pr-gate/           ← Installation workflow (BMad)
+├── .github/workflows/           ← GitHub Actions (runtime)
+├── src/                         ← TypeScript orchestrator (runtime)
+└── package.json                 ← Node.js dependencies (runtime)
+```
+
+**Key Insight:** BMad layer provides documentation and discoverability; TypeScript layer provides execution.
+
+---
+
+## Configuration
+
+Via `module.config.yaml` or environment variables:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `ai_provider` | `copilot` | Use `copilot` or `claude` |
+| `concurrency` | `4` | Parallel chunk analysis |
+| `slack_enabled` | `false` | Send failure notifications to Slack |
+| `email_enabled` | `false` | Send failure notifications via email |
 
 ---
 
 ## License
 
-Internal — distribute only inside your organisation.
+UNLICENSED — Internal use only
