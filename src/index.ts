@@ -2,14 +2,15 @@
 /**
  * BMAD Code Guardian — CLI entrypoint
  *
- * Invoked by the GitHub Actions step on the self-hosted runner.
- * Reads a unified diff, evaluates each chunk via the Copilot API,
+ * Invoked by the GitHub Actions step on the runner.
+ * Reads a unified diff, evaluates each chunk via AI (Copilot/Claude/OpenAI),
  * reports back to the PR + Slack + email, and exits non-zero on
  * any violation so the required status check turns red.
  */
 
 import { parseDiff } from './diff-parser';
 import { evaluateChunks } from './orchestrator';
+import { AIClient } from './ai-client';
 import { CopilotClient } from './copilot-client';
 import {
   buildEmailHtml,
@@ -19,6 +20,7 @@ import {
 import { postGithubComment } from './notifiers/github';
 import { postSlack } from './notifiers/slack';
 import { sendEmail } from './notifiers/email';
+import type { AIProvider } from './types';
 
 function env(name: string, required = false): string {
   const v = process.env[name] ?? '';
@@ -41,7 +43,12 @@ async function main() {
     `https://github.com/${repo}/pull/${prNumber}`;
 
   const githubToken = env('GITHUB_TOKEN', true);
-  const copilotPat = env('COPILOT_PAT', true);
+
+  // Multi-provider AI support
+  const aiProvider = (env('AI_PROVIDER') || 'copilot') as AIProvider;
+  const aiModel = env('AI_MODEL');
+  const aiApiKey = env('AI_API_KEY') || env('COPILOT_PAT') || env('ANTHROPIC_API_KEY') || env('OPENAI_API_KEY');
+  const aiBaseUrl = env('AI_BASE_URL');
 
   const slackUrl = env('SLACK_WEBHOOK_URL');
   const smtpHost = env('EMAIL_SMTP_HOST');
@@ -51,6 +58,7 @@ async function main() {
 
   console.log(`[guardian] Repo:          ${repo}`);
   console.log(`[guardian] PR:            #${prNumber} by ${author} @ ${sha.slice(0, 8)}`);
+  console.log(`[guardian] AI Provider:   ${aiProvider}${aiModel ? ` (${aiModel})` : ''}`);
   console.log(`[guardian] Diff path:     ${diffPath}`);
 
   const blocks = parseDiff(diffPath);
@@ -61,7 +69,16 @@ async function main() {
     return;
   }
 
-  const client = new CopilotClient({ pat: copilotPat });
+  // Initialize AI client based on provider
+  const client = aiProvider === 'copilot' && !aiModel
+    ? new CopilotClient({ pat: aiApiKey })
+    : new AIClient({
+        provider: aiProvider,
+        model: aiModel,
+        apiKey: aiApiKey,
+        baseUrl: aiBaseUrl,
+      });
+
   const verdict = await evaluateChunks(blocks, client);
 
   console.log(

@@ -93,12 +93,22 @@ jobs:
         env:
           DIFF_PATH: ${{ steps.diff.outputs.diff_path }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Multi-provider AI support
+          AI_PROVIDER: ${{ secrets.AI_PROVIDER || 'copilot' }}
+          AI_MODEL: ${{ secrets.AI_MODEL }}
+          AI_API_KEY: ${{ secrets.AI_API_KEY || secrets.ANTHROPIC_API_KEY || secrets.OPENAI_API_KEY || secrets.COPILOT_PAT }}
+          AI_BASE_URL: ${{ secrets.AI_BASE_URL }}
+          # Legacy support (still works)
           COPILOT_PAT: ${{ secrets.COPILOT_PAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # PR context
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          # Notifications
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           EMAIL_SMTP_HOST: ${{ secrets.EMAIL_SMTP_HOST }}
           EMAIL_SMTP_USER: ${{ secrets.EMAIL_SMTP_USER }}

@@ -5,8 +5,10 @@ import {
   ChunkResult,
   CodeBlock,
   CopilotVerdict,
+  AIVerdict,
   LanguageBucket,
 } from './types';
+import { AIClient } from './ai-client';
 import { CopilotClient } from './copilot-client';
 
 const PROMPT_DIR = path.resolve(
@@ -62,7 +64,7 @@ function buildUserContent(block: CodeBlock): string {
 
 export async function evaluateChunks(
   blocks: CodeBlock[],
-  client: CopilotClient,
+  client: AIClient | CopilotClient,
 ): Promise<AggregateVerdict> {
   const prompts = loadPrompts();
   const results: ChunkResult[] = [];

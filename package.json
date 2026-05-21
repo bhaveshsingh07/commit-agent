@@ -1,8 +1,8 @@
 {
   "name": "@bhaveshsingh07/commit-agent",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Server-side AI gatekeeper for pull requests. Routes diff chunks across AEM, modern frontend, and Magento/PHP buckets and gates the merge button via GitHub Repository Rulesets.",
+  "description": "Server-side AI gatekeeper for pull requests with multi-provider support (Copilot, Claude, OpenAI, Azure). Routes diff chunks across AEM, modern frontend, and Magento/PHP buckets and gates the merge button via GitHub Repository Rulesets.",
   "main": "dist/index.js",
   "bin": {
     "code-guardian": "dist/index.js"

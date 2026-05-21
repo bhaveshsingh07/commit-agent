@@ -56,3 +56,17 @@ export interface CopilotClientOptions {
   timeoutMs?: number;
   maxRetries?: number;
 }
+
+// Universal AI client types
+export type AIProvider = 'copilot' | 'claude' | 'openai' | 'azure' | 'custom';
+
+export interface AIClientOptions {
+  provider: AIProvider;
+  model?: string;
+  apiKey: string;
+  baseUrl?: string;
+  timeoutMs?: number;
+  maxRetries?: number;
+}
+
+export type AIVerdict = CopilotVerdict; // Same structure across all providers

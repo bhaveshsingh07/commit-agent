@@ -48,13 +48,46 @@ See `SETUP.md` for traditional deployment.
 
 ---
 
+## Supported AI Providers
+
+| Provider | Models | Secret Names | Cost (est. per PR) |
+| --- | --- | --- | --- |
+| **Anthropic Claude** | `claude-sonnet-4`, `claude-opus-4`, `claude-haiku-4` | `AI_PROVIDER=claude`<br/>`ANTHROPIC_API_KEY` | $0.03-0.05 |
+| **OpenAI ChatGPT** | `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo` | `AI_PROVIDER=openai`<br/>`OPENAI_API_KEY` | $0.05-0.10 |
+| **GitHub Copilot** | `gpt-4o` | `AI_PROVIDER=copilot`<br/>`COPILOT_PAT` (or GitHub App) | Included in seat |
+| **Azure OpenAI** | Your deployment | `AI_PROVIDER=azure`<br/>`AI_API_KEY` + `AI_BASE_URL` | Varies |
+| **Custom (Groq, etc)** | OpenAI-compatible | `AI_PROVIDER=custom`<br/>`AI_API_KEY` + `AI_BASE_URL` | Varies |
+
+### Quick Configuration
+
+Just set 2-3 GitHub secrets:
+
+```bash
+# For Claude (recommended)
+gh secret set AI_PROVIDER --body "claude"
+gh secret set AI_MODEL --body "claude-sonnet-4-20250514"
+gh secret set ANTHROPIC_API_KEY --body "sk-ant-..."
+
+# For OpenAI
+gh secret set AI_PROVIDER --body "openai"
+gh secret set AI_MODEL --body "gpt-4o"
+gh secret set OPENAI_API_KEY --body "sk-..."
+
+# For Copilot (legacy, still works)
+gh secret set COPILOT_PAT --body "ghp_..."
+```
+
+**Backward compatible:** Existing `COPILOT_PAT` secrets still work without any changes.
+
+---
+
 ## Architecture
 
 **Hybrid BMad + GitHub Actions Design:**
 
 - **BMad Layer:** Skills, workflows, documentation, configuration
 - **Runtime Layer:** TypeScript orchestrator executing on GitHub Actions runners
-- **AI Layer:** GitHub Copilot or Anthropic Claude for code analysis
+- **AI Layer:** Multi-provider support (Copilot, Claude, OpenAI, Azure, custom)
 
 ```
 Developer opens PR
@@ -65,20 +98,12 @@ Runner executes TypeScript orchestrator (src/)
     ↓
 Orchestrator loads prompts from skills/code-guardian/prompts/
     ↓
-AI analyzes each code chunk
+AI analyzes each code chunk (via selected provider)
     ↓
 Aggregated verdict → exit code 0 (pass) or 1 (fail)
     ↓
 GitHub blocks merge if failed
 ```
-
----
-
-## Supported Platforms
-
-- **AEM Core & Edge Delivery Services** — Java, JSP, HTL, XML
-- **Modern Frontend** — React, TypeScript, JavaScript, HTML, CSS
-- **Magento Commerce** — PHP, Magento 2 framework
 
 ---
 
@@ -97,6 +122,9 @@ code-quality-gate/
 │   └── setup-pr-gate/           ← Installation workflow (BMad)
 ├── .github/workflows/           ← GitHub Actions (runtime)
 ├── src/                         ← TypeScript orchestrator (runtime)
+│   ├── ai-client.ts             ← Multi-provider AI client
+│   ├── copilot-client.ts        ← Legacy Copilot client
+│   └── ...
 └── package.json                 ← Node.js dependencies (runtime)
 ```
 
@@ -110,7 +138,8 @@ Via `module.config.yaml` or environment variables:
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `ai_provider` | `copilot` | Use `copilot` or `claude` |
+| `ai_provider` | `copilot` | Use `copilot`, `claude`, `openai`, `azure`, or `custom` |
+| `ai_model` | (auto) | Specific model (e.g., `claude-sonnet-4`, `gpt-4o`) |
 | `concurrency` | `4` | Parallel chunk analysis |
 | `slack_enabled` | `false` | Send failure notifications to Slack |
 | `email_enabled` | `false` | Send failure notifications via email |
@@ -120,3 +149,13 @@ Via `module.config.yaml` or environment variables:
 ## License
 
 UNLICENSED — Internal use only
+
+---
+
+## Links
+
+- **Setup Guide:** `SETUP.md`
+- **Architecture:** `docs/ARCHITECTURE.md`
+- **Troubleshooting:** `docs/TROUBLESHOOTING.md`
+- **BMad Workflow:** `workflows/setup-pr-gate/workflow.md`
+- **Changes Log:** `CHANGES.md`

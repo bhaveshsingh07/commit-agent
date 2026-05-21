@@ -1,12 +1,15 @@
 name: code-quality-gate
-version: 1.0.0
+version: 1.1.0
 description: |
-  Server-side AI gatekeeper for pull requests. Automatically scans every PR 
-  for security vulnerabilities, repository impact, and platform-specific best 
-  practices across AEM, modern frontend (React/TS), and Magento/PHP codebases.
+  Server-side AI gatekeeper for pull requests with multi-provider AI support.
+  Automatically scans every PR for security vulnerabilities, repository impact, 
+  and platform-specific best practices across AEM, modern frontend (React/TS), 
+  and Magento/PHP codebases.
   
-  Blocks the merge button when violations are found, posts detailed remediation 
-  guidance, and sends notifications via Slack and email.
+  Supports GitHub Copilot, Anthropic Claude, OpenAI ChatGPT, Azure OpenAI, and 
+  custom OpenAI-compatible providers. Blocks the merge button when violations 
+  are found, posts detailed remediation guidance, and sends notifications via 
+  Slack and email.
 
 author:
   name: Bhavesh Singh
@@ -29,8 +32,11 @@ runtime_requirements:
   node: ">=20"
   runner: self-hosted or github-hosted
   required_secrets:
-    - COPILOT_PAT
+    - AI_API_KEY (or provider-specific: COPILOT_PAT, ANTHROPIC_API_KEY, OPENAI_API_KEY)
   optional_secrets:
+    - AI_PROVIDER (copilot, claude, openai, azure, custom)
+    - AI_MODEL (model name for the chosen provider)
+    - AI_BASE_URL (for azure or custom endpoints)
     - SLACK_WEBHOOK_URL
     - EMAIL_SMTP_HOST
     - EMAIL_SMTP_USER
@@ -59,8 +65,20 @@ config_options:
   ai_provider:
     type: string
     default: copilot
-    allowed: [copilot, claude]
+    allowed: [copilot, claude, openai, azure, custom]
     description: Which AI service to use for code analysis
+  
+  ai_model:
+    type: string
+    default: (provider-specific default)
+    examples:
+      - claude-sonnet-4-20250514
+      - claude-opus-4-20250514
+      - claude-haiku-4-20241022
+      - gpt-4o
+      - gpt-4-turbo
+      - gpt-3.5-turbo
+    description: Specific model to use (provider-dependent)
   
   slack_enabled:
     type: boolean
